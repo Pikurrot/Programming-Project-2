@@ -79,6 +79,33 @@ void printRoadMap(struct RoadMap *top)
 	printf("\n");
 }
 
+void deleteAllRoadMap(struct RoadMap *top)
+{
+	// will delete only once all the cities from the stack (before progam finishes its execution)
+	// if (top==NULL)
+	// {
+	//    	printf("nothing to remove");
+	//    	return;
+	//    }
+
+	// // remove the one element
+	//   	if (top->next==NULL)
+	// {
+	// 	printf("removing data %d\n", top->data);
+	// 	free (top);
+	//        top = NULL;
+	//        printf("List is empty now");
+	//        return;
+	// }
+	// struct Node * current = top;
+	//     while (current != NULL)
+	//     {
+	//         free(current);
+	//         top = current = current->next;
+	//     }
+	// 	printf("List empty");
+} // IGUAL AQUEST ÑULTIM ES POT MILLORAR
+
 int main(int argc, char **argv)
 {
 	int option;
