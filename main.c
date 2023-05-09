@@ -44,6 +44,25 @@ int RouteSearch(struct RoadMap *top, int source_id, int dest_id)
 
 	return RouteSearch(top, min_cost_id, dest_id);
 }
+
+void addToRoadMap(struct RoadMap *top, int city_id, int total_cost)
+{
+	// add a new city to the stack
+	struct RoadMap *link = (struct RoadMap *)malloc(sizeof(struct RoadMap));
+	link->city_id = city_id;
+	link->total_cost = total_cost;
+
+	if (top == NULL)
+	{
+		top = link;
+		top->next = NULL;
+		return;
+	}
+
+	link->next = top;
+	top = link;
+}
+
 int main(int argc, char **argv)
 {
 	int option;
