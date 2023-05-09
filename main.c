@@ -46,5 +46,34 @@ int RouteSearch(struct RoadMap *top, int source_id, int dest_id)
 }
 int main(int argc, char **argv)
 {
+	int option;
+
+	// Check that argument is correct
+	if (argc != 2)
+	{
+		printf("Invalid number of arguments");
+		return -1;
+	}
+
+	option = atoi(argv[0]);
+
+	if (option < 1 || option > 3)
+	{
+		printf("Yor must enter an integer (from 1-3)");
+		return -1;
+	}
+
+	// Treat every option
+	switch (option)
+	{
+	case 1:
+		// code here
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+	}
+
 	return 0;
 }
