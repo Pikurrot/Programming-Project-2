@@ -63,6 +63,22 @@ void addToRoadMap(struct RoadMap *top, int city_id, int total_cost)
 	top = link;
 }
 
+void printRoadMap(struct RoadMap *top)
+{
+	// will print the current status of the stack
+	struct RoadMap *current = top;
+
+	while (current != NULL)
+	{
+		// search for the name of the city in CivilRegistry
+		// ...
+		// printf("%d ", current->data);
+		// current = current->next;
+	}
+
+	printf("\n");
+}
+
 int main(int argc, char **argv)
 {
 	int option;
