@@ -17,8 +17,20 @@ int RouteSearch(struct RoadMap *top, int source_id, int dest_id);
 void addToRoadMap(struct RoadMap *top, int city_id, int total_cost);
 void printRoadMap(struct RoadMap *top);
 void deleteAllRoadMap(struct RoadMap *top);
+char *getCityName(int id);
 
 // A. World journey
+char *getCityName(int id)
+{
+	for (int i = 0; i < NUMBER_CITIES; i++)
+	{
+		if (citiesInfo[i].city_id == id)
+		{
+			return citiesInfo[i].city_name;
+		}
+	}
+	return "Not-existing city";
+}
 
 // Path searching
 // must create partial stack before calling RouteSearch() (top), add source city to the stack at the beggining
