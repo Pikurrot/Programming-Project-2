@@ -13,12 +13,12 @@
 
 #include "small.h"
 
-void addToRoadMap(struct RoadMap *top, int city_id, int total_cost);
 void printRoadMap(struct RoadMap *top);
 void deleteAllRoadMap(struct RoadMap *top);
 char *getCityName(int id);
 void resetVisited();
 int RouteSearch(struct RoadMap *first, struct RoadMap *last, int source_id, int dest_id);
+void addToRoadMap(struct RoadMap *first, struct RoadMap *last, int city_id, int total_cost);
 int visited[NUMBER_CITIES];
 
 // A. World journey
@@ -83,22 +83,23 @@ int RouteSearch(struct RoadMap *first, struct RoadMap *last, int source_id, int 
 	return RouteSearch(first, last, min_cost_id, dest_id);
 }
 
-void addToRoadMap(struct RoadMap *top, int city_id, int total_cost)
+// Data structure functions
+void addToRoadMap(struct RoadMap *first, struct RoadMap *last, int city_id, int total_cost)
 {
-	// add a new city to the stack
-	struct RoadMap *link = (struct RoadMap *)malloc(sizeof(struct RoadMap));
+	// add a new city to the queue
+	struct RoadMap *link = malloc(sizeof(struct RoadMap));
 	link->city_id = city_id;
 	link->total_cost = total_cost;
+	link->next = NULL;
 
-	if (top == NULL)
+	if (first == NULL)
 	{
-		top = link;
-		top->next = NULL;
+		first = last = link;
 		return;
 	}
 
-	link->next = top;
-	top = link;
+	last->next = link;
+	last = link;
 }
 
 void printRoadMap(struct RoadMap *top)
