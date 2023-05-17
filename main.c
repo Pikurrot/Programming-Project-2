@@ -159,7 +159,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	option = atoi(argv[0]);
+	option = atoi(argv[1]);
 
 	if (option < 1 || option > 3)
 	{
@@ -167,11 +167,20 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	resetVisited();
+
 	// Treat every option
 	switch (option)
 	{
 	case 1:
-		// code here
+		resetVisited();
+		struct RoadMap link = {2, 0, NULL};
+		struct RoadMap *first = &link;
+		struct RoadMap *last = first;
+		RouteSearch(first, last, 2, 5);
+		printRoadMap(first, last);
+		deleteAllRoadMap(first, last);
+		printRoadMap(first, last);
 		break;
 	case 2:
 		break;
