@@ -13,12 +13,12 @@
 
 #include "small.h"
 
-void printRoadMap(struct RoadMap *top);
 void deleteAllRoadMap(struct RoadMap *top);
 char *getCityName(int id);
 void resetVisited();
 int RouteSearch(struct RoadMap *first, struct RoadMap *last, int source_id, int dest_id);
 void addToRoadMap(struct RoadMap *first, struct RoadMap *last, int city_id, int total_cost);
+void printRoadMap(struct RoadMap *first, struct RoadMap *last);
 int visited[NUMBER_CITIES];
 
 // A. World journey
@@ -102,17 +102,15 @@ void addToRoadMap(struct RoadMap *first, struct RoadMap *last, int city_id, int 
 	last = link;
 }
 
-void printRoadMap(struct RoadMap *top)
+void printRoadMap(struct RoadMap *first, struct RoadMap *last)
 {
 	// will print the current status of the stack
-	struct RoadMap *current = top;
+	struct RoadMap *current = first;
 
 	while (current != NULL)
 	{
-		// search for the name of the city in CivilRegistry
-		// ...
-		// printf("%d ", current->data);
-		// current = current->next;
+		printf("%s-", getCityName(current->city_id));
+		current = current->next;
 	}
 
 	printf("\n");
