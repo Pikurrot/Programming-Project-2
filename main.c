@@ -18,6 +18,8 @@ void addToRoadMap(struct RoadMap *top, int city_id, int total_cost);
 void printRoadMap(struct RoadMap *top);
 void deleteAllRoadMap(struct RoadMap *top);
 char *getCityName(int id);
+void resetVisited();
+int visited[NUMBER_CITIES];
 
 // A. World journey
 char *getCityName(int id)
@@ -30,6 +32,15 @@ char *getCityName(int id)
 		}
 	}
 	return "Not-existing city";
+}
+
+void resetVisited()
+{
+	// initialize the visited array with 0
+	for (int i = 0; i < NUMBER_CITIES; i++)
+	{
+		visited[i] = 0;
+	}
 }
 
 // Path searching
