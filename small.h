@@ -46,7 +46,7 @@ struct CivilRegistry citiesInfo[NUMBER_CITIES] =
     {1, "Lisbon", "Madalena", "Lourenço", -1, -1},
     {2, "Madrid", "", "", -1, -1},
     {3, "Paris", "Louise", "Paul", 9, 4},
-    {4, "Rome", "Agnese", "Leonardo", 8, 1},
+    {4, "Rome", "Agnese", "Leonardo", -1, -1},
     {5, "Zurich", "Eva", "Albert", 1, 6},
     {6, "Amsterdam", "Amber", "Finn", -1, -1},
     {7, "Viena", "", "", -1, -1},
