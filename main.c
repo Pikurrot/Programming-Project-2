@@ -13,12 +13,12 @@
 
 #include "small.h"
 
-int RouteSearch(struct RoadMap *top, int source_id, int dest_id);
 void addToRoadMap(struct RoadMap *top, int city_id, int total_cost);
 void printRoadMap(struct RoadMap *top);
 void deleteAllRoadMap(struct RoadMap *top);
 char *getCityName(int id);
 void resetVisited();
+int RouteSearch(struct RoadMap *first, struct RoadMap *last, int source_id, int dest_id);
 int visited[NUMBER_CITIES];
 
 // A. World journey
@@ -44,17 +44,22 @@ void resetVisited()
 }
 
 // Path searching
-// must create partial stack before calling RouteSearch() (top), add source city to the stack at the beggining
-int RouteSearch(struct RoadMap *top, int source_id, int dest_id)
+// must create partial queue before calling RouteSearch() (first and last), add source city to the queue at the beggining
+// also, resetVisited() before calling RouteSearch()
+int RouteSearch(struct RoadMap *first, struct RoadMap *last, int source_id, int dest_id)
 {
-	int i, min_cost, cost, min_cost_id;
+	// returns the total cost of the calculated route. Meanwhile, adds the cities it visits to the queue
+	int i, min_cost, cost, min_cost_id, total_cost;
 	int *connections;
+	total_cost = last->total_cost;
 
 	// if there is a direct connection, it's chosen; else it chooses connection to city with lowest cost from current
 	if (adjacency_matrix[source_id][dest_id] != 0)
 	{
-
-		return adjacency_matrix[source_id][dest_id];
+		// direct connection
+		total_cost += adjacency_matrix[source_id][dest_id];
+		addToRoadMap(first, last, dest_id, total_cost);
+		return total_cost;
 	}
 
 	// search the city with minimum cost
@@ -65,16 +70,17 @@ int RouteSearch(struct RoadMap *top, int source_id, int dest_id)
 	for (i = 1; i < NUMBER_CITIES; i++)
 	{
 		cost = connections[i];
-		if (min_cost == 0 || (cost > 0 && cost < min_cost))
+		if ((min_cost == 0 || (cost > 0 && cost < min_cost)) && visited[i] == 0)
 		{
 			min_cost = cost;
 			min_cost_id = i;
 		}
 	}
+	total_cost += min_cost;
+	visited[min_cost_id] = 1;
+	addToRoadMap(first, last, min_cost_id, total_cost);
 
-	addToRoadMap(top, min_cost_id, min_cost + top->total_cost);
-
-	return RouteSearch(top, min_cost_id, dest_id);
+	return RouteSearch(first, last, min_cost_id, dest_id);
 }
 
 void addToRoadMap(struct RoadMap *top, int city_id, int total_cost)
