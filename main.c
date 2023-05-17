@@ -13,12 +13,13 @@
 
 #include "small.h"
 
-void deleteAllRoadMap(struct RoadMap *top);
 char *getCityName(int id);
 void resetVisited();
 int RouteSearch(struct RoadMap *first, struct RoadMap *last, int source_id, int dest_id);
 void addToRoadMap(struct RoadMap *first, struct RoadMap *last, int city_id, int total_cost);
 void printRoadMap(struct RoadMap *first, struct RoadMap *last);
+void deleteAllRoadMap(struct RoadMap *first, struct RoadMap *last);
+
 int visited[NUMBER_CITIES];
 
 // A. World journey
@@ -116,32 +117,36 @@ void printRoadMap(struct RoadMap *first, struct RoadMap *last)
 	printf("\n");
 }
 
-void deleteAllRoadMap(struct RoadMap *top)
+void deleteAllRoadMap(struct RoadMap *first, struct RoadMap *last)
 {
 	// will delete only once all the cities from the stack (before progam finishes its execution)
-	// if (top==NULL)
-	// {
-	//    	printf("nothing to remove");
-	//    	return;
-	//    }
+	if (first == NULL)
+	{
+		// printf("Queue is empty, nothing to remove");
+		return;
+	}
 
-	// // remove the one element
-	//   	if (top->next==NULL)
-	// {
-	// 	printf("removing data %d\n", top->data);
-	// 	free (top);
-	//        top = NULL;
-	//        printf("List is empty now");
-	//        return;
-	// }
-	// struct Node * current = top;
-	//     while (current != NULL)
-	//     {
-	//         free(current);
-	//         top = current = current->next;
-	//     }
-	// 	printf("List empty");
-} // IGUAL AQUEST ÑULTIM ES POT MILLORAR
+	// remove the one element
+	if (first->next == NULL)
+	{
+		free(first);
+		first = last = NULL;
+		// printf("List is empty now");
+	}
+
+	while (first != NULL) // top != NULL;
+	{
+		struct RoadMap *temp = first->next;
+		free(first);
+		first = temp;
+	}
+	// printf("List empty");
+
+	// struct RoadMap *temp = first;
+	// first = first->next;
+	// free(temp);
+	// WHILE ALTERNATIU
+}
 
 int main(int argc, char **argv)
 {
