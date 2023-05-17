@@ -1,3 +1,12 @@
+// PREGUNTES CLASSSE 11/05
+// 1. same city loop
+// 2. SAME CITY LOOP visited vector for not repeating cities (NOT SAVE COST,
+// save binary vector with position 0 or 1 if visited!) (or maybe save vector
+// with positions? my idea)
+// 3. #ifdef compilation include large.h
+//  dijkstra algorithm is more exhaustive, but doesn't work with medium and
+//  large, we have to use HEURISTIC
+//  ----------------------------------------------------------------
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
