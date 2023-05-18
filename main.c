@@ -39,7 +39,7 @@
 #endif
 */
 
-char *getCityName(int id);
+// graph functions
 void resetVisited();
 int RouteSearch(struct RoadMap *first, struct RoadMap *last, int source_id, int dest_id);
 void addToRoadMap(struct RoadMap *first, struct RoadMap *last, int city_id, int total_cost);
@@ -48,18 +48,6 @@ void deleteAllRoadMap(struct RoadMap *first, struct RoadMap *last);
 
 int visited[NUMBER_CITIES];
 
-// A. World journey
-char *getCityName(int id)
-{
-	for (int i = 0; i < NUMBER_CITIES; i++)
-	{
-		if (citiesInfo[i].city_id == id)
-		{
-			return citiesInfo[i].city_name;
-		}
-	}
-	return "Not-existing city";
-}
 
 void resetVisited()
 {
@@ -136,7 +124,7 @@ void printRoadMap(struct RoadMap *first, struct RoadMap *last)
 
 	while (current != NULL)
 	{
-		printf("%s-", getCityName(current->city_id));
+		printf("%s-", citiesInfo[current->city_id].city_name);
 		current = current->next;
 	}
 
