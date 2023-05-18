@@ -44,7 +44,7 @@ void resetVisited();
 int routeSearch(struct RoadMap **first, struct RoadMap **last, int source_id, int dest_id);
 void addToRoadMap(struct RoadMap **first, struct RoadMap **last, int city_id, int total_cost);
 void printRoadMap(struct RoadMap *first, struct RoadMap *last);
-void deleteAllRoadMap(struct RoadMap *first, struct RoadMap *last);
+void deleteAllRoadMap(struct RoadMap **first, struct RoadMap **last);
 
 int visited[NUMBER_CITIES];
 
@@ -131,30 +131,28 @@ void printRoadMap(struct RoadMap *first, struct RoadMap *last)
 	printf("\n");
 }
 
-void deleteAllRoadMap(struct RoadMap *first, struct RoadMap *last)
+void deleteAllRoadMap(struct RoadMap **first, struct RoadMap **last)
 {
 	// will delete only once all the cities from the stack (before progam finishes its execution)
-	if (first == NULL)
+	if (*first == NULL)
 	{
-		// printf("Queue is empty, nothing to remove");
 		return;
 	}
 
 	// remove the one element
-	if (first->next == NULL)
+	if ((*first)->next == NULL)
 	{
-		free(first);
-		first = last = NULL;
-		// printf("List is empty now");
+		free(*first);
+		*first = *last = NULL;
+		return;
 	}
 
-	while (first != NULL) // top != NULL;
+	while (*first != NULL)
 	{
-		struct RoadMap *temp = first->next;
-		free(first);
-		first = temp;
+		struct RoadMap *temp = *first;
+		*first = (*first)->next;
+		free(temp);
 	}
-	// printf("List empty");
 
 	// struct RoadMap *temp = first;
 	// first = first->next;
@@ -192,7 +190,7 @@ int main(int argc, char **argv)
 		struct RoadMap *last = NULL;
 		addToRoadMap(&first, &last, 0, 0);
 		printRoadMap(first, last);
-		deleteAllRoadMap(first, last);
+		deleteAllRoadMap(&first, &last);
 		printRoadMap(first, last);
 		break;
 	case 2:
