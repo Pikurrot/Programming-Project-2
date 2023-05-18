@@ -58,7 +58,9 @@ struct FamilyTreeNode *newNode(char *motherName, char *fatherName, int city_id);
 void queuePush(struct QueueNode **first, struct QueueNode **last, struct FamilyTreeNode *data);
 void queuePop(struct QueueNode **first, struct QueueNode **last);
 void createDFS(struct FamilyTreeNode *root);
+void printDFS(struct FamilyTreeNode *root, int level);
 void createBFS(struct FamilyTreeNode *root);
+void printBFS(struct FamilyTreeNode *root);
 
 int visited[NUMBER_CITIES];
 
@@ -244,27 +246,27 @@ void createDFS(struct FamilyTreeNode *root)
 }
 
 // BEFORE in main: printf("DFS -> Names:\n");
-// int genDFS = 0;
-void printDFS(struct FamilyTreeNode *root, int genDFS)
+// int level = 0;
+void printDFS(struct FamilyTreeNode *root, int level)
 {
 	// given a tree print its nodes using DFS
 
 	if (root == NULL)
 		return;
 
-	for (int i = 0; i < genDFS; i++)
+	for (int i = 0; i < level; i++)
 	{
 		printf("->");
 	}
 
-	if (genDFS > 0)
+	if (level > 0)
 	{
 		printf(" ");
 	}
 
 	printf("%s and %s (%s)\n", root->motherName, root->fatherName, citiesInfo[root->city_id].city_name);
-	printDFS(root->mother_parents, genDFS + 1);
-	printDFS(root->father_parents, genDFS + 1);
+	printDFS(root->mother_parents, level + 1);
+	printDFS(root->father_parents, level + 1);
 }
 
 // BFS
@@ -273,14 +275,16 @@ void createBFS(struct FamilyTreeNode *root)
 	// create tree using BFS
 	struct QueueNode *queue_first = NULL;
 	struct QueueNode *queue_last = NULL;
+	struct FamilyTreeNode *currentNode;
+	struct CivilRegistry my_city, mother_parents_city, father_parents_city;
 	queuePush(&queue_first, &queue_last, root);
 
 	while (queue_first != NULL)
 	{
-		struct FamilyTreeNode *currentNode = queue_first->data;
+		currentNode = queue_first->data;
 		queuePop(&queue_first, &queue_last);
 
-		struct CivilRegistry my_city = citiesInfo[currentNode->city_id];
+		my_city = citiesInfo[currentNode->city_id];
 
 		if (my_city.mother_parents_city_id == -1)
 		{
@@ -288,49 +292,56 @@ void createBFS(struct FamilyTreeNode *root)
 		}
 
 		// create nodes for mothers' side
-		struct CivilRegistry mother_parents_city = citiesInfo[my_city.mother_parents_city_id];
+		mother_parents_city = citiesInfo[my_city.mother_parents_city_id];
 		currentNode->mother_parents = newNode(mother_parents_city.mother_name, mother_parents_city.father_name, mother_parents_city.city_id);
-		queuePush(&queue_first, &queue_first, currentNode->mother_parents);
+		queuePush(&queue_first, &queue_last, currentNode->mother_parents);
 
 		// create nodes for fathers' side
-		struct CivilRegistry father_parents_city = citiesInfo[my_city.father_parents_city_id];
+		father_parents_city = citiesInfo[my_city.father_parents_city_id];
 		currentNode->father_parents = newNode(father_parents_city.mother_name, father_parents_city.father_name, father_parents_city.city_id);
-		queuePush(&queue_first, &queue_first, currentNode->father_parents);
+		queuePush(&queue_first, &queue_last, currentNode->father_parents);
 	}
 }
 
-void printBFS(struct FamilyTreeNode *root, int genBFS)
+void printBFS(struct FamilyTreeNode *root)
 {
 	// given a tree, print its nodes using BFS
 	struct QueueNode *queue_first = NULL;
 	struct QueueNode *queue_last = NULL;
+	struct FamilyTreeNode *currentNode;
+	int level = 0, nodes_current_level = 1, nodes_next_level = 0;
+
 	queuePush(&queue_first, &queue_last, root);
-	
+
 	while (queue_first != NULL)
 	{
-		struct FamilyTreeNode *currentNode = queue_first->data;
+		currentNode = queue_first->data;
 		queuePop(&queue_first, &queue_last);
+		nodes_current_level--;
 
-		for (int i = 0; i < genBFS; i++)
+		for (int i = 0; i < level; i++)
 		{
 			printf("->");
 		}
-
-		if (genBFS > 0)
-		{
-			printf(" ");
-		}
-
 		printf("%s and %s (%s)\n", currentNode->motherName, currentNode->fatherName, citiesInfo[currentNode->city_id].city_name);
 
 		if (currentNode->mother_parents != NULL)
 		{
 			queuePush(&queue_first, &queue_last, currentNode->mother_parents);
+			nodes_next_level++;
 		}
 
 		if (currentNode->father_parents != NULL)
 		{
 			queuePush(&queue_first, &queue_last, currentNode->father_parents);
+			nodes_next_level++;
+		}
+
+		if (nodes_current_level == 0)
+		{
+			nodes_current_level = nodes_next_level;
+			nodes_next_level = 0;
+			level++;
 		}
 	}
 }
@@ -362,18 +373,16 @@ int main(int argc, char **argv)
 	{
 	case 1:
 		printf("Starting...\n");
-		resetVisited();
-		struct RoadMap *first = NULL;
-		struct RoadMap *last = NULL;
-		addToRoadMap(&first, &last, 0, 0);
-		// routeSearch(&first, &last, 0, 6);
-		printRoadMap(first, last);
+		// test DFS
+		// struct FamilyTreeNode *root = newNode("Maria", "Jordi", 0);
+		// createDFS(root);
+		// printDFS(root, 0);
 
-		// struct CivilRegistry newCity = citiesInfo[0];
-		// struct FamilyTreeNode *root = newNode(newCity.mother_name, newCity.father_name, newCity.city_id);
+		// test BFS
+		struct FamilyTreeNode *root = newNode("Maria", "Jordi", 0);
+		createBFS(root);
+		printBFS(root);
 
-		deleteAllRoadMap(&first, &last);
-		printRoadMap(first, last);
 		printf("Done\n");
 		break;
 	case 2:
