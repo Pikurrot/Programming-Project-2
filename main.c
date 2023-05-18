@@ -122,6 +122,8 @@ void printRoadMap(struct RoadMap *first, struct RoadMap *last)
 	// will print the current status of the stack
 	struct RoadMap *current = first;
 
+	printf("\n");
+
 	while (current != NULL)
 	{
 		printf("%s-", citiesInfo[current->city_id].city_name);
