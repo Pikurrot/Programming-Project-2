@@ -41,8 +41,8 @@
 
 // graph functions
 void resetVisited();
-void addToRoadMap(struct RoadMap *first, struct RoadMap *last, int city_id, int total_cost);
 int routeSearch(struct RoadMap **first, struct RoadMap **last, int source_id, int dest_id);
+void addToRoadMap(struct RoadMap **first, struct RoadMap **last, int city_id, int total_cost);
 void printRoadMap(struct RoadMap *first, struct RoadMap *last);
 void deleteAllRoadMap(struct RoadMap *first, struct RoadMap *last);
 
@@ -98,22 +98,23 @@ int routeSearch(struct RoadMap **first, struct RoadMap **last, int source_id, in
 }
 
 // Data structure functions
-void addToRoadMap(struct RoadMap *first, struct RoadMap *last, int city_id, int total_cost)
+void addToRoadMap(struct RoadMap **first, struct RoadMap **last, int city_id, int total_cost)
 {
 	// add a new city to the queue
 	struct RoadMap *link = malloc(sizeof(struct RoadMap));
 	link->city_id = city_id;
 	link->total_cost = total_cost;
 	link->next = NULL;
+	visited[city_id] = 1;
 
-	if (first == NULL)
+	if (*first == NULL)
 	{
-		first = last = link;
+		*first = *last = link;
 		return;
 	}
 
-	last->next = link;
-	last = link;
+	(*last)->next = link;
+	*last = link;
 }
 
 void printRoadMap(struct RoadMap *first, struct RoadMap *last)
@@ -189,6 +190,7 @@ int main(int argc, char **argv)
 		resetVisited();
 		struct RoadMap *first = NULL;
 		struct RoadMap *last = NULL;
+		addToRoadMap(&first, &last, 0, 0);
 		printRoadMap(first, last);
 		deleteAllRoadMap(first, last);
 		printRoadMap(first, last);
