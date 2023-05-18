@@ -323,6 +323,12 @@ void printBFS(struct FamilyTreeNode *root)
 		{
 			printf("->");
 		}
+
+		if (level > 0)
+		{
+			printf(" ");
+		}
+
 		printf("%s and %s (%s)\n", currentNode->motherName, currentNode->fatherName, citiesInfo[currentNode->city_id].city_name);
 
 		if (currentNode->mother_parents != NULL)
