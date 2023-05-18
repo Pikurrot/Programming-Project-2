@@ -16,14 +16,15 @@
 #include <string.h>
 
 // #define USE_SMALL
-#define USE_MEDIUM
+#define USE_SMALL
 
 #ifdef USE_SMALL
 #include "small.h"
 #endif
 #ifdef USE_MEDIUM
 #include "medium.h"
-#else
+#endif
+#ifdef USE_LARGE
 #include "large.h"
 #endif
 
@@ -360,7 +361,7 @@ int main(int argc, char **argv)
 	switch (option)
 	{
 	case 1:
-		printf("Starting...");
+		printf("Starting...\n");
 		resetVisited();
 		struct RoadMap *first = NULL;
 		struct RoadMap *last = NULL;
