@@ -6,12 +6,38 @@
 // 3. #ifdef compilation include large.h
 //  dijkstra algorithm is more exhaustive, but doesn't work with medium and
 //  large, we have to use HEURISTIC
+//--- 5/18
+// 4. ifdef
+// hay q descubrir la cosa especial q se define en la compilacion, cuando se define el gcc para usar el ifdef
+// delivery SUNDAY 28/05
 //  ----------------------------------------------------------------
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+// #define USE_SMALL
+#define USE_MEDIUM
+
+#ifdef USE_SMALL
 #include "small.h"
+#endif
+#ifdef USE_MEDIUM
+#include "medium.h"
+#else
+#include "large.h"
+#endif
+
+/*
+#define USE_HEADER 1
+
+#if USE_HEADER == 1
+#include "small.h"
+#elif USE_HEADER == 2
+#include "medium.h"
+#elif USE_HEADER == 3
+#include "large.h"
+#endif
+*/
 
 char *getCityName(int id);
 void resetVisited();
