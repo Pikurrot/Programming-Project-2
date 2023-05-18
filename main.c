@@ -41,8 +41,8 @@
 
 // graph functions
 void resetVisited();
-int RouteSearch(struct RoadMap *first, struct RoadMap *last, int source_id, int dest_id);
 void addToRoadMap(struct RoadMap *first, struct RoadMap *last, int city_id, int total_cost);
+int routeSearch(struct RoadMap **first, struct RoadMap **last, int source_id, int dest_id);
 void printRoadMap(struct RoadMap *first, struct RoadMap *last);
 void deleteAllRoadMap(struct RoadMap *first, struct RoadMap *last);
 
@@ -59,14 +59,14 @@ void resetVisited()
 }
 
 // Path searching
-// must create partial queue before calling RouteSearch() (first and last), add source city to the queue at the beggining
-// also, resetVisited() before calling RouteSearch()
-int RouteSearch(struct RoadMap *first, struct RoadMap *last, int source_id, int dest_id)
+// must create partial queue before calling routeSearch() (first and last), add source city to the queue at the beggining
+// also, resetVisited() before calling routeSearch()
+int routeSearch(struct RoadMap **first, struct RoadMap **last, int source_id, int dest_id)
 {
 	// returns the total cost of the calculated route. Meanwhile, adds the cities it visits to the queue
 	int i, min_cost, cost, min_cost_id, total_cost;
 	int *connections;
-	total_cost = last->total_cost;
+	total_cost = (*last)->total_cost;
 
 	// if there is a direct connection, it's chosen; else it chooses connection to city with lowest cost from current
 	if (adjacency_matrix[source_id][dest_id] != 0)
@@ -79,23 +79,22 @@ int RouteSearch(struct RoadMap *first, struct RoadMap *last, int source_id, int 
 
 	// search the city with minimum cost
 	connections = adjacency_matrix[source_id];
-	min_cost = connections[0];
-	min_cost_id = 0;
+	min_cost = -1;
+	min_cost_id = -1;
 
-	for (i = 1; i < NUMBER_CITIES; i++)
+	for (i = 0; i < NUMBER_CITIES; i++)
 	{
 		cost = connections[i];
-		if ((min_cost == 0 || (cost > 0 && cost < min_cost)) && visited[i] == 0)
+		if (cost > 0 && visited[i] == 0 && (min_cost == -1 || cost < min_cost))
 		{
 			min_cost = cost;
 			min_cost_id = i;
 		}
 	}
 	total_cost += min_cost;
-	visited[min_cost_id] = 1;
 	addToRoadMap(first, last, min_cost_id, total_cost);
 
-	return RouteSearch(first, last, min_cost_id, dest_id);
+	return routeSearch(first, last, min_cost_id, dest_id);
 }
 
 // Data structure functions
@@ -188,10 +187,8 @@ int main(int argc, char **argv)
 	{
 	case 1:
 		resetVisited();
-		struct RoadMap link = {2, 0, NULL};
-		struct RoadMap *first = &link;
-		struct RoadMap *last = first;
-		RouteSearch(first, last, 2, 5);
+		struct RoadMap *first = NULL;
+		struct RoadMap *last = NULL;
 		printRoadMap(first, last);
 		deleteAllRoadMap(first, last);
 		printRoadMap(first, last);
