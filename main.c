@@ -15,30 +15,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-// #define USE_SMALL
-#define USE_SMALL
+// #define SMALL // unfreeze to avoid warnings
 
-#ifdef USE_SMALL
+#ifdef SMALL
 #include "small.h"
-#endif
-#ifdef USE_MEDIUM
+#elif defined MEDIUM
 #include "medium.h"
-#endif
-#ifdef USE_LARGE
+#elif defined LARGE
 #include "large.h"
 #endif
-
-/*
-#define USE_HEADER 1
-
-#if USE_HEADER == 1
-#include "small.h"
-#elif USE_HEADER == 2
-#include "medium.h"
-#elif USE_HEADER == 3
-#include "large.h"
-#endif
-*/
 
 // graph functions
 void resetVisited();
@@ -353,49 +338,23 @@ void printBFS(struct FamilyTreeNode *root)
 }
 
 //----------------------------------------------------------main
-int main(int argc, char **argv)
+int main()
 {
-	int option;
-
-	// Check that argument is correct
-	if (argc != 2)
-	{
-		printf("Invalid number of arguments");
-		return -1;
-	}
-
-	option = atoi(argv[1]);
-
-	if (option < 1 || option > 3)
-	{
-		printf("Yor must enter an integer (from 1-3)");
-		return -1;
-	}
+	// use -DSMALL / -DMEDIUM / -DLARGE to compile with different datasets
 
 	resetVisited();
+	printf("Starting...\n");
+	// test DFS
+	// struct FamilyTreeNode *root = newNode("Maria", "Jordi", 0);
+	// createDFS(root);
+	// printDFS(root, 0);
 
-	// Treat every option
-	switch (option)
-	{
-	case 1:
-		printf("Starting...\n");
-		// test DFS
-		// struct FamilyTreeNode *root = newNode("Maria", "Jordi", 0);
-		// createDFS(root);
-		// printDFS(root, 0);
+	// test BFS
+	struct FamilyTreeNode *root = newNode("Maria", "Jordi", 0);
+	createBFS(root);
+	printBFS(root);
 
-		// test BFS
-		struct FamilyTreeNode *root = newNode("Maria", "Jordi", 0);
-		createBFS(root);
-		printBFS(root);
-
-		printf("Done\n");
-		break;
-	case 2:
-		break;
-	case 3:
-		break;
-	}
+	printf("Done\n");
 
 	return 0;
 }
