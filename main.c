@@ -46,8 +46,22 @@ void addToRoadMap(struct RoadMap **first, struct RoadMap **last, int city_id, in
 void printRoadMap(struct RoadMap *first, struct RoadMap *last);
 void deleteAllRoadMap(struct RoadMap **first, struct RoadMap **last);
 
+// tree functions
+struct QueueNode
+{
+	struct FamilyTreeNode *data;
+	struct QueueNode *next;
+};
+
+struct FamilyTreeNode *newNode(char *motherName, char *fatherName, int city_id);
+void queuePush(struct QueueNode **first, struct QueueNode **last, struct FamilyTreeNode *data);
+void queuePop(struct QueueNode **first, struct QueueNode **last);
+void createDFS(struct FamilyTreeNode *root);
+void createBFS(struct FamilyTreeNode *root);
+
 int visited[NUMBER_CITIES];
 
+// --------------- Graph functions ---------------
 
 void resetVisited()
 {
@@ -155,13 +169,172 @@ void deleteAllRoadMap(struct RoadMap **first, struct RoadMap **last)
 		*first = (*first)->next;
 		free(temp);
 	}
-
-	// struct RoadMap *temp = first;
-	// first = first->next;
-	// free(temp);
-	// WHILE ALTERNATIU
 }
 
+// --------------- Tree functions ---------------
+
+struct FamilyTreeNode *newNode(char *motherName, char *fatherName, int city_id)
+{
+	struct FamilyTreeNode *link = malloc(sizeof(struct FamilyTreeNode));
+	strcpy(link->motherName, motherName);
+	strcpy(link->fatherName, fatherName);
+	link->city_id = city_id;
+	link->mother_parents = link->father_parents = NULL;
+	return link;
+}
+
+void queuePush(struct QueueNode **first, struct QueueNode **last, struct FamilyTreeNode *data)
+{
+	// add a new element to the queue
+	struct QueueNode *link = malloc(sizeof(struct QueueNode));
+	link->data = data;
+	link->next = NULL;
+
+	if (*first == NULL)
+	{
+		*first = *last = link;
+		return;
+	}
+
+	(*last)->next = link;
+	*last = link;
+}
+
+void queuePop(struct QueueNode **first, struct QueueNode **last)
+{
+	// remove the first element
+	if (*first == NULL)
+	{
+		return;
+	}
+
+	if ((*first)->next == NULL)
+	{
+		free(*first);
+		*first = *last = NULL;
+		return;
+	}
+
+	struct QueueNode *temp = *first;
+	*first = (*first)->next;
+	free(temp);
+}
+
+// DFS
+void createDFS(struct FamilyTreeNode *root)
+{
+	// create tree using DFS
+	struct CivilRegistry my_city = citiesInfo[root->city_id];
+
+	if (my_city.mother_parents_city_id == -1)
+	{
+		return;
+	}
+
+	// create all nodes for mothers' side
+	struct CivilRegistry mother_parents_city = citiesInfo[my_city.mother_parents_city_id];
+	root->mother_parents = newNode(mother_parents_city.mother_name, mother_parents_city.father_name, mother_parents_city.city_id);
+	createDFS(root->mother_parents);
+
+	// create all nodes for fathers' side
+	struct CivilRegistry father_parents_city = citiesInfo[my_city.father_parents_city_id];
+	root->father_parents = newNode(father_parents_city.mother_name, father_parents_city.father_name, father_parents_city.city_id);
+	createDFS(root->father_parents);
+}
+
+// BEFORE in main: printf("DFS -> Names:\n");
+// int genDFS = 0;
+void printDFS(struct FamilyTreeNode *root, int genDFS)
+{
+	// given a tree print its nodes using DFS
+
+	if (root == NULL)
+		return;
+
+	for (int i = 0; i < genDFS; i++)
+	{
+		printf("->");
+	}
+
+	if (genDFS > 0)
+	{
+		printf(" ");
+	}
+
+	printf("%s and %s (%s)\n", root->motherName, root->fatherName, citiesInfo[root->city_id].city_name);
+	printDFS(root->mother_parents, genDFS + 1);
+	printDFS(root->father_parents, genDFS + 1);
+}
+
+// BFS
+void createBFS(struct FamilyTreeNode *root)
+{
+	// create tree using BFS
+	struct QueueNode *queue_first = NULL;
+	struct QueueNode *queue_last = NULL;
+	queuePush(&queue_first, &queue_last, root);
+
+	while (queue_first != NULL)
+	{
+		struct FamilyTreeNode *currentNode = queue_first->data;
+		queuePop(&queue_first, &queue_last);
+
+		struct CivilRegistry my_city = citiesInfo[currentNode->city_id];
+
+		if (my_city.mother_parents_city_id == -1)
+		{
+			continue;
+		}
+
+		// create nodes for mothers' side
+		struct CivilRegistry mother_parents_city = citiesInfo[my_city.mother_parents_city_id];
+		currentNode->mother_parents = newNode(mother_parents_city.mother_name, mother_parents_city.father_name, mother_parents_city.city_id);
+		queuePush(&queue_first, &queue_first, currentNode->mother_parents);
+
+		// create nodes for fathers' side
+		struct CivilRegistry father_parents_city = citiesInfo[my_city.father_parents_city_id];
+		currentNode->father_parents = newNode(father_parents_city.mother_name, father_parents_city.father_name, father_parents_city.city_id);
+		queuePush(&queue_first, &queue_first, currentNode->father_parents);
+	}
+}
+
+void printBFS(struct FamilyTreeNode *root, int genBFS)
+{
+	// given a tree, print its nodes using BFS
+	struct QueueNode *queue_first = NULL;
+	struct QueueNode *queue_last = NULL;
+	queuePush(&queue_first, &queue_last, root);
+	
+	while (queue_first != NULL)
+	{
+		struct FamilyTreeNode *currentNode = queue_first->data;
+		queuePop(&queue_first, &queue_last);
+
+		for (int i = 0; i < genBFS; i++)
+		{
+			printf("->");
+		}
+
+		if (genBFS > 0)
+		{
+			printf(" ");
+		}
+
+		printf("%s and %s (%s)\n", currentNode->motherName, currentNode->fatherName, citiesInfo[currentNode->city_id].city_name);
+
+		if (currentNode->mother_parents != NULL)
+		{
+			queuePush(&queue_first, &queue_last, currentNode->mother_parents);
+		}
+
+		if (currentNode->father_parents != NULL)
+		{
+			queuePush(&queue_first, &queue_last, currentNode->father_parents);
+		}
+	}
+}
+
+//----------------------------------------------------------main
 int main(int argc, char **argv)
 {
 	int option;
@@ -187,13 +360,20 @@ int main(int argc, char **argv)
 	switch (option)
 	{
 	case 1:
+		printf("Starting...");
 		resetVisited();
 		struct RoadMap *first = NULL;
 		struct RoadMap *last = NULL;
 		addToRoadMap(&first, &last, 0, 0);
+		// routeSearch(&first, &last, 0, 6);
 		printRoadMap(first, last);
+
+		// struct CivilRegistry newCity = citiesInfo[0];
+		// struct FamilyTreeNode *root = newNode(newCity.mother_name, newCity.father_name, newCity.city_id);
+
 		deleteAllRoadMap(&first, &last);
 		printRoadMap(first, last);
+		printf("Done\n");
 		break;
 	case 2:
 		break;
