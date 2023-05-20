@@ -59,6 +59,9 @@ int visited[NUMBER_CITIES];
 struct CityIdNode *first_city;
 struct CityIdNode *last_city;
 
+struct RoadMap *first_total = NULL;
+struct RoadMap *last_total = NULL;
+
 // --------------- Graph functions ---------------
 void addCity(int data)
 {
@@ -150,12 +153,17 @@ int routeSearch(struct RoadMap **first, struct RoadMap **last, int source_id, in
 // Data structure functions
 void addToRoadMap(struct RoadMap **first, struct RoadMap **last, int city_id, int total_cost)
 {
-	// add a new city to the queue
+	// add a new city to both the given queue and the total queue
 	struct RoadMap *link = malloc(sizeof(struct RoadMap));
 	link->city_id = city_id;
 	link->total_cost = total_cost;
 	link->next = NULL;
 	visited[city_id] = 1;
+
+	if (first_total == NULL)
+	{
+		first_total = last_total = link;
+	}
 
 	if (*first == NULL)
 	{
@@ -164,7 +172,9 @@ void addToRoadMap(struct RoadMap **first, struct RoadMap **last, int city_id, in
 	}
 
 	(*last)->next = link;
+	last_total->next = link;
 	*last = link;
+	last_total = link;
 }
 
 void printRoadMap(struct RoadMap *first, struct RoadMap *last)
@@ -179,8 +189,6 @@ void printRoadMap(struct RoadMap *first, struct RoadMap *last)
 		printf("%s-", citiesInfo[current->city_id].city_name);
 		current = current->next;
 	}
-
-	printf("\n");
 }
 
 void deleteAllRoadMap(struct RoadMap **first, struct RoadMap **last)
@@ -412,10 +420,14 @@ int main()
 		city_A = city_B;
 		printRoadMap(first, last);
 		printf(" %d\n", last->total_cost);
-		deleteAllRoadMap(&first, &last);
 		first = last = NULL;
 		resetVisited();
 	}
+
+	printf("Total road map:\n");
+	printRoadMap(first_total, last_total);
+	printf("\n\nTotal cost: %d\n", last_total->total_cost); // hi havia last->total_cost
+	deleteAllRoadMap(&first_total, &last_total);
 
 	// test DFS
 	// struct FamilyTreeNode *root = newNode("Maria", "Jordi", 0);
