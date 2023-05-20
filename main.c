@@ -26,6 +26,8 @@
 #endif
 
 // graph functions
+void addCity();
+int removeCity();
 void resetVisited();
 int routeSearch(struct RoadMap **first, struct RoadMap **last, int source_id, int dest_id);
 void addToRoadMap(struct RoadMap **first, struct RoadMap **last, int city_id, int total_cost);
@@ -39,6 +41,12 @@ struct QueueNode
 	struct QueueNode *next;
 };
 
+struct CityIdNode
+{
+	int id;
+	struct CityIdNode *next;
+};
+
 struct FamilyTreeNode *newNode(char *motherName, char *fatherName, int city_id);
 void queuePush(struct QueueNode **first, struct QueueNode **last, struct FamilyTreeNode *data);
 void queuePop(struct QueueNode **first, struct QueueNode **last);
@@ -48,8 +56,51 @@ void createBFS(struct FamilyTreeNode *root);
 void printBFS(struct FamilyTreeNode *root);
 
 int visited[NUMBER_CITIES];
+struct CityIdNode *first_city;
+struct CityIdNode *last_city;
 
 // --------------- Graph functions ---------------
+void addCity(int data)
+{
+	// add a new element to the queue
+	struct CityIdNode *new_city = malloc(sizeof(struct CityIdNode));
+	new_city->id = data;
+	new_city->next = NULL;
+
+	if (first_city == NULL)
+	{
+		first_city = last_city = new_city;
+		return;
+	}
+
+	last_city->next = new_city;
+	last_city = new_city;
+}
+
+int removeCity()
+{
+	// remove the first element
+	int id = -1;
+
+	if (first_city == NULL)
+	{
+		return id;
+	}
+
+	if (first_city->next == NULL)
+	{
+		id = first_city->id;
+		free(first_city);
+		first_city = last_city = NULL;
+		return id;
+	}
+
+	struct CityIdNode *temp = first_city;
+	id = first_city->id;
+	first_city = first_city->next;
+	free(temp);
+	return id;
+}
 
 void resetVisited()
 {
@@ -60,9 +111,6 @@ void resetVisited()
 	}
 }
 
-// Path searching
-// must create partial queue before calling routeSearch() (first and last), add source city to the queue at the beggining
-// also, resetVisited() before calling routeSearch()
 int routeSearch(struct RoadMap **first, struct RoadMap **last, int source_id, int dest_id)
 {
 	// returns the total cost of the calculated route. Meanwhile, adds the cities it visits to the queue
@@ -213,6 +261,7 @@ void createDFS(struct FamilyTreeNode *root)
 {
 	// create tree using DFS
 	struct CivilRegistry my_city = citiesInfo[root->city_id];
+	addCity(root->city_id);
 
 	if (my_city.mother_parents_city_id == -1)
 	{
@@ -268,6 +317,7 @@ void createBFS(struct FamilyTreeNode *root)
 	{
 		currentNode = queue_first->data;
 		queuePop(&queue_first, &queue_last);
+		addCity(currentNode->city_id);
 
 		my_city = citiesInfo[currentNode->city_id];
 
@@ -343,16 +393,34 @@ int main()
 	// use -DSMALL / -DMEDIUM / -DLARGE to compile with different datasets
 
 	resetVisited();
-	printf("Starting...\n");
+	printf("Ancestors' tree:\n\n");
+	printf("BFS -> Names:\n");
+	struct FamilyTreeNode *root = newNode("Maria", "Jordi", 0);
+	createBFS(root);
+	printBFS(root);
+
+	printf("Partial road map:\n");
+	struct RoadMap *first = NULL;
+	struct RoadMap *last = NULL;
+	int city_A = removeCity(), city_B;
+
+	while (last_city != NULL)
+	{
+		addToRoadMap(&first, &last, city_A, 0);
+		city_B = removeCity();
+		routeSearch(&first, &last, city_A, city_B);
+		city_A = city_B;
+		printRoadMap(first, last);
+		printf(" %d\n", last->total_cost);
+		deleteAllRoadMap(&first, &last);
+		first = last = NULL;
+		resetVisited();
+	}
+
 	// test DFS
 	// struct FamilyTreeNode *root = newNode("Maria", "Jordi", 0);
 	// createDFS(root);
 	// printDFS(root, 0);
-
-	// test BFS
-	struct FamilyTreeNode *root = newNode("Maria", "Jordi", 0);
-	createBFS(root);
-	printBFS(root);
 
 	printf("Done\n");
 
