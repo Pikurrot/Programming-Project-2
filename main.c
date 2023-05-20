@@ -134,6 +134,13 @@ int routeSearch(struct RoadMap **first, struct RoadMap **last, int source_id, in
 			min_cost_id = i;
 		}
 	}
+
+	if (min_cost == -1)
+	{
+		printf("Cities %s and %s can't be connected using this heuristic.\n", citiesInfo[source_id].city_name, citiesInfo[dest_id].city_name);
+		return total_cost;
+	}
+
 	total_cost += min_cost;
 	addToRoadMap(first, last, min_cost_id, total_cost);
 
