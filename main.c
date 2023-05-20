@@ -1,21 +1,9 @@
-// PREGUNTES CLASSSE 11/05
-// 1. same city loop
-// 2. SAME CITY LOOP visited vector for not repeating cities (NOT SAVE COST,
-// save binary vector with position 0 or 1 if visited!) (or maybe save vector
-// with positions? my idea)
-// 3. #ifdef compilation include large.h
-//  dijkstra algorithm is more exhaustive, but doesn't work with medium and
-//  large, we have to use HEURISTIC
-//--- 5/18
-// 4. ifdef
-// hay q descubrir la cosa especial q se define en la compilacion, cuando se define el gcc para usar el ifdef
-// delivery SUNDAY 28/05
-//  ----------------------------------------------------------------
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// #define SMALL // unfreeze to avoid warnings
+// unfreeze to avoid warnings
+// #define SMALL
 
 #ifdef SMALL
 #include "small.h"
@@ -61,6 +49,8 @@ struct CityIdNode *last_city;
 
 struct RoadMap *first_total = NULL;
 struct RoadMap *last_total = NULL;
+
+int final_cost = 0;
 
 // --------------- Graph functions ---------------
 void addCity(int data)
@@ -182,11 +172,13 @@ void printRoadMap(struct RoadMap *first, struct RoadMap *last)
 	// will print the current status of the stack
 	struct RoadMap *current = first;
 
-	printf("\n");
-
 	while (current != NULL)
 	{
-		printf("%s-", citiesInfo[current->city_id].city_name);
+		printf("%s", citiesInfo[current->city_id].city_name);
+		if (current != last)
+		{
+			printf("-");
+		}
 		current = current->next;
 	}
 }
@@ -395,6 +387,19 @@ void printBFS(struct FamilyTreeNode *root)
 	}
 }
 
+void deleteTree(struct FamilyTreeNode *root)
+{
+	// remove all nodes from the tree
+	if (root == NULL)
+	{
+		return;
+	}
+
+	deleteTree(root->mother_parents);
+	deleteTree(root->father_parents);
+	free(root);
+}
+
 //----------------------------------------------------------main
 int main()
 {
@@ -407,7 +412,7 @@ int main()
 	createBFS(root);
 	printBFS(root);
 
-	printf("Partial road map:\n");
+	printf("\nPartial road map:\n");
 	struct RoadMap *first = NULL;
 	struct RoadMap *last = NULL;
 	int city_A = removeCity(), city_B;
@@ -416,7 +421,7 @@ int main()
 	{
 		addToRoadMap(&first, &last, city_A, 0);
 		city_B = removeCity();
-		routeSearch(&first, &last, city_A, city_B);
+		final_cost += routeSearch(&first, &last, city_A, city_B);
 		city_A = city_B;
 		printRoadMap(first, last);
 		printf(" %d\n", last->total_cost);
@@ -424,17 +429,41 @@ int main()
 		resetVisited();
 	}
 
-	printf("Total road map:\n");
+	printf("\nTotal road map:\n");
 	printRoadMap(first_total, last_total);
-	printf("\n\nTotal cost: %d\n", last_total->total_cost); // hi havia last->total_cost
+	printf("\n\nTotal cost: %d\n", final_cost);
 	deleteAllRoadMap(&first_total, &last_total);
+	deleteTree(root);
+	root = NULL;
 
-	// test DFS
-	// struct FamilyTreeNode *root = newNode("Maria", "Jordi", 0);
-	// createDFS(root);
-	// printDFS(root, 0);
+	printf("\n----------------------------------\n");
+	printf("DFS -> Names:\n");
+	root = newNode("Maria", "Jordi", 0);
+	createDFS(root);
+	printDFS(root, 0);
 
-	printf("Done\n");
+	printf("\nPartial road map:\n");
+	city_A = removeCity();
+	final_cost = 0;
+
+	while (last_city != NULL)
+	{
+		addToRoadMap(&first, &last, city_A, 0);
+		city_B = removeCity();
+		final_cost += routeSearch(&first, &last, city_A, city_B);
+		city_A = city_B;
+		printRoadMap(first, last);
+		printf(" %d\n", last->total_cost);
+		first = last = NULL;
+		resetVisited();
+	}
+
+	printf("\nTotal road map:\n");
+	printRoadMap(first_total, last_total);
+	printf("\n\nTotal cost: %d\n", final_cost);
+	deleteAllRoadMap(&first_total, &last_total);
+	deleteTree(root);
+	root = NULL;
 
 	return 0;
 }
