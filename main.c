@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// unfreeze to avoid warnings
+// unfreeze to avoid warnings:
 // #define SMALL
 
 #ifdef SMALL
@@ -13,7 +13,7 @@
 #include "large.h"
 #endif
 
-// graph functions
+// graph functions declaration
 void addCity();
 int removeCity();
 void resetVisited();
@@ -22,14 +22,14 @@ void addToRoadMap(struct RoadMap **first, struct RoadMap **last, int city_id, in
 void printRoadMap(struct RoadMap *first, struct RoadMap *last);
 void deleteAllRoadMap(struct RoadMap **first, struct RoadMap **last);
 
-// tree functions
-struct QueueNode
+// tree functions and structures declaration
+struct QueueNode // queue to assist the BFS algorithm
 {
 	struct FamilyTreeNode *data;
 	struct QueueNode *next;
 };
 
-struct CityIdNode
+struct CityIdNode // queue to keep track of the order of destination cities that must be visited
 {
 	int id;
 	struct CityIdNode *next;
@@ -72,14 +72,16 @@ void addCity(int data)
 
 int removeCity()
 {
-	// remove the first element
+	// remove the first element of a city queue used in main() to create partial Roadmap
 	int id = -1;
 
 	if (first_city == NULL)
 	{
+		// returns -1 if queue empty
 		return id;
 	}
 
+	// otherwise it removes the first city and returns its id
 	if (first_city->next == NULL)
 	{
 		id = first_city->id;
@@ -87,7 +89,6 @@ int removeCity()
 		first_city = last_city = NULL;
 		return id;
 	}
-
 	struct CityIdNode *temp = first_city;
 	id = first_city->id;
 	first_city = first_city->next;
@@ -111,10 +112,9 @@ int routeSearch(struct RoadMap **first, struct RoadMap **last, int source_id, in
 	int *connections;
 	total_cost = (*last)->total_cost;
 
-	// if there is a direct connection, it's chosen; else it chooses connection to city with lowest cost from current
+	// if there is a direct connection, it's chosen
 	if (adjacency_matrix[source_id][dest_id] != 0)
 	{
-		// direct connection
 		total_cost += adjacency_matrix[source_id][dest_id];
 		addToRoadMap(first, last, dest_id, total_cost);
 		return total_cost;
@@ -128,7 +128,7 @@ int routeSearch(struct RoadMap **first, struct RoadMap **last, int source_id, in
 	for (i = 0; i < NUMBER_CITIES; i++)
 	{
 		cost = connections[i];
-		if (cost > 0 && visited[i] == 0 && (min_cost == -1 || cost < min_cost))
+		if (cost > 0 && visited[i] == 0 && (min_cost == -1 || cost < min_cost)) // there is a connection & it's not already visited & its cost is the lowest
 		{
 			min_cost = cost;
 			min_cost_id = i;
@@ -142,7 +142,7 @@ int routeSearch(struct RoadMap **first, struct RoadMap **last, int source_id, in
 	}
 
 	total_cost += min_cost;
-	addToRoadMap(first, last, min_cost_id, total_cost);
+	addToRoadMap(first, last, min_cost_id, total_cost); // add to the roadmap the chosen city
 
 	return routeSearch(first, last, min_cost_id, dest_id);
 }
@@ -151,7 +151,7 @@ int routeSearch(struct RoadMap **first, struct RoadMap **last, int source_id, in
 void addToRoadMap(struct RoadMap **first, struct RoadMap **last, int city_id, int total_cost)
 {
 	// add a new city to both the given queue and the total queue
-	struct RoadMap *link = malloc(sizeof(struct RoadMap));
+	struct RoadMap *link = malloc(sizeof(struct RoadMap)); // both partial and total queue would share this node
 	link->city_id = city_id;
 	link->total_cost = total_cost;
 	link->next = NULL;
@@ -159,15 +159,18 @@ void addToRoadMap(struct RoadMap **first, struct RoadMap **last, int city_id, in
 
 	if (first_total == NULL)
 	{
+		// the first city of all is connected to the total queue
 		first_total = last_total = link;
 	}
 
 	if (*first == NULL)
 	{
+		// the first city (of all or just of a trip) is connected to the partial queue
 		*first = *last = link;
-		return;
+		return; // by exiting the function here, we avoid connecting the first city of a trip to the total queue, so that it's not repeated with the last city of the previous trip
 	}
 
+	// for any other city that is not the first one, connect it to both queues
 	(*last)->next = link;
 	last_total->next = link;
 	*last = link;
@@ -228,7 +231,7 @@ struct FamilyTreeNode *newNode(char *motherName, char *fatherName, int city_id)
 
 void queuePush(struct QueueNode **first, struct QueueNode **last, struct FamilyTreeNode *data)
 {
-	// add a new element to the queue
+	// add a new element to the assisting queue
 	struct QueueNode *link = malloc(sizeof(struct QueueNode));
 	link->data = data;
 	link->next = NULL;
@@ -245,7 +248,7 @@ void queuePush(struct QueueNode **first, struct QueueNode **last, struct FamilyT
 
 void queuePop(struct QueueNode **first, struct QueueNode **last)
 {
-	// remove the first element
+	// remove the first element of the assisting queue
 	if (*first == NULL)
 	{
 		return;
@@ -272,21 +275,21 @@ void createDFS(struct FamilyTreeNode *root)
 
 	if (my_city.mother_parents_city_id == -1)
 	{
+		// if the node has no more children, ends recursivity
 		return;
 	}
 
-	// create all nodes for mothers' side
+	// create all nodes for mothers' side with recursivity
 	struct CivilRegistry mother_parents_city = citiesInfo[my_city.mother_parents_city_id];
 	root->mother_parents = newNode(mother_parents_city.mother_name, mother_parents_city.father_name, mother_parents_city.city_id);
 	createDFS(root->mother_parents);
 
-	// create all nodes for fathers' side
+	// create all nodes for fathers' side with recursivity
 	struct CivilRegistry father_parents_city = citiesInfo[my_city.father_parents_city_id];
 	root->father_parents = newNode(father_parents_city.mother_name, father_parents_city.father_name, father_parents_city.city_id);
 	createDFS(root->father_parents);
 }
 
-// BEFORE in main: printf("DFS -> Names:\n");
 // int level = 0;
 void printDFS(struct FamilyTreeNode *root, int level)
 {
@@ -314,31 +317,35 @@ void printDFS(struct FamilyTreeNode *root, int level)
 void createBFS(struct FamilyTreeNode *root)
 {
 	// create tree using BFS
+	// initialize a queue to assist with finding ancestors
 	struct QueueNode *queue_first = NULL;
 	struct QueueNode *queue_last = NULL;
+	// initialize a node to build the family tree
 	struct FamilyTreeNode *currentNode;
+	// initialize empty civil registry structures that will point to cities
 	struct CivilRegistry my_city, mother_parents_city, father_parents_city;
-	queuePush(&queue_first, &queue_last, root);
+	queuePush(&queue_first, &queue_last, root); // add to the queue the root parents
 
 	while (queue_first != NULL)
 	{
-		currentNode = queue_first->data;
+		currentNode = queue_first->data; // add first city of the queue in the tree
 		queuePop(&queue_first, &queue_last);
-		addCity(currentNode->city_id);
+		addCity(currentNode->city_id); // we save the city in another queue to later create the route map
 
-		my_city = citiesInfo[currentNode->city_id];
+		my_city = citiesInfo[currentNode->city_id]; // take the city information of the current node from the Civil Registry
 
 		if (my_city.mother_parents_city_id == -1)
 		{
+			// if the node has no more children, skip the part of adding them to the queue
 			continue;
 		}
 
-		// create nodes for mothers' side
-		mother_parents_city = citiesInfo[my_city.mother_parents_city_id];
-		currentNode->mother_parents = newNode(mother_parents_city.mother_name, mother_parents_city.father_name, mother_parents_city.city_id);
-		queuePush(&queue_first, &queue_last, currentNode->mother_parents);
+		// save node for mothers' side
+		mother_parents_city = citiesInfo[my_city.mother_parents_city_id];																	  // save the id of the current node's mother's city
+		currentNode->mother_parents = newNode(mother_parents_city.mother_name, mother_parents_city.father_name, mother_parents_city.city_id); // add a node for the mother's parents
+		queuePush(&queue_first, &queue_last, currentNode->mother_parents);																	  // add it to the assisting queue so that it can be added as a root in a future while iteration
 
-		// create nodes for fathers' side
+		// save node for fathers' side (same as mothers' side)
 		father_parents_city = citiesInfo[my_city.father_parents_city_id];
 		currentNode->father_parents = newNode(father_parents_city.mother_name, father_parents_city.father_name, father_parents_city.city_id);
 		queuePush(&queue_first, &queue_last, currentNode->father_parents);
@@ -347,11 +354,11 @@ void createBFS(struct FamilyTreeNode *root)
 
 void printBFS(struct FamilyTreeNode *root)
 {
-	// given a tree, print its nodes using BFS
+	// given a tree, print its nodes using BFS (the implementation is basically the same than in createBFS())
 	struct QueueNode *queue_first = NULL;
 	struct QueueNode *queue_last = NULL;
 	struct FamilyTreeNode *currentNode;
-	int level = 0, nodes_current_level = 1, nodes_next_level = 0;
+	int level = 0, nodes_current_level = 1, nodes_next_level = 0; // variables to keep track of the level of the tree
 
 	queuePush(&queue_first, &queue_last, root);
 
@@ -375,18 +382,21 @@ void printBFS(struct FamilyTreeNode *root)
 
 		if (currentNode->mother_parents != NULL)
 		{
+			// save node for mothers' side
 			queuePush(&queue_first, &queue_last, currentNode->mother_parents);
 			nodes_next_level++;
 		}
 
 		if (currentNode->father_parents != NULL)
 		{
+			// save node for mothers' side
 			queuePush(&queue_first, &queue_last, currentNode->father_parents);
 			nodes_next_level++;
 		}
 
 		if (nodes_current_level == 0)
 		{
+			// update the level
 			nodes_current_level = nodes_next_level;
 			nodes_next_level = 0;
 			level++;
@@ -415,26 +425,30 @@ int main()
 	resetVisited();
 	printf("Ancestors' tree:\n\n");
 	printf("BFS -> Names:\n");
-	struct FamilyTreeNode *root = newNode("Maria", "Jordi", 0);
+	struct FamilyTreeNode *root = newNode("Maria", "Jordi", 0); // define the root from the parents of Barcelona
 	createBFS(root);
+	// here the cities' id queue is full
 	printBFS(root);
 
 	printf("\nPartial road map:\n");
+	// initializes empty first and last values of RoadMap
 	struct RoadMap *first = NULL;
 	struct RoadMap *last = NULL;
+	// city_A and city_B will be the partial source and destination of the road map
 	int city_A = removeCity(), city_B;
 
-	while (last_city != NULL)
+	while (last_city != NULL) // until the queue is empty
 	{
-		addToRoadMap(&first, &last, city_A, 0);
-		city_B = removeCity();
-		final_cost += routeSearch(&first, &last, city_A, city_B);
-		city_A = city_B;
+		addToRoadMap(&first, &last, city_A, 0);					  // add the first city to the roadmap
+		city_B = removeCity();									  // set destination
+		final_cost += routeSearch(&first, &last, city_A, city_B); // build roadmap of the trip and save its cost
+		city_A = city_B;										  // set the starting point for the next trip
 		printRoadMap(first, last);
 		printf(" %d\n", last->total_cost);
-		first = last = NULL;
+		first = last = NULL; // reset partial roadmap
 		resetVisited();
 	}
+	// here the cities' id queue is empty
 
 	printf("\nTotal road map:\n");
 	printRoadMap(first_total, last_total);
@@ -443,10 +457,12 @@ int main()
 	deleteTree(root);
 	root = NULL;
 
+	// same steps but with DFS
 	printf("\n----------------------------------\n");
 	printf("DFS -> Names:\n");
 	root = newNode("Maria", "Jordi", 0);
 	createDFS(root);
+	// here the cities' id queue is full again
 	printDFS(root, 0);
 
 	printf("\nPartial road map:\n");
@@ -464,6 +480,7 @@ int main()
 		first = last = NULL;
 		resetVisited();
 	}
+	// here the cities' id queue is empty again
 
 	printf("\nTotal road map:\n");
 	printRoadMap(first_total, last_total);
