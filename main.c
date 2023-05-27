@@ -14,7 +14,7 @@
 #endif
 
 // graph functions declaration
-void addCity();
+void addCity(int data);
 int removeCity();
 void resetVisited();
 int routeSearch(struct RoadMap **first, struct RoadMap **last, int source_id, int dest_id);
@@ -445,6 +445,13 @@ int main()
 		city_A = city_B;										  // set the starting point for the next trip
 		printRoadMap(first, last);
 		printf(" %d\n", last->total_cost);
+		if (first != first_total)
+		{
+			// free the first element of partial roadmap, as it's not included in the total roadmap
+			struct RoadMap *temp = first;
+			first = NULL;
+			free(temp);
+		}
 		first = last = NULL; // reset partial roadmap
 		resetVisited();
 	}
@@ -477,6 +484,13 @@ int main()
 		city_A = city_B;
 		printRoadMap(first, last);
 		printf(" %d\n", last->total_cost);
+		if (first != first_total)
+		{
+			// free the first element of partial roadmap, as it's not included in the total roadmap
+			struct RoadMap *temp = first;
+			first = NULL;
+			free(temp);
+		}
 		first = last = NULL;
 		resetVisited();
 	}
